@@ -24,6 +24,7 @@ module.exports = {
       { text: 'JavaScript设计模式', link: '/designPattern/'},
       { text: 'CSS奇技淫巧',link: '/css/'},
       { text: 'Git',link: '/git/'},
+      { text: 'Linux',link: '/linux/'},
     ],
     sidebar: {
       '/css/': [cssSidebar],
