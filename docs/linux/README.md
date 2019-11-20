@@ -56,7 +56,8 @@ $ cp source destination
 mv命令可以将文件和目录从一个位置移动到另一个位置或重新命名
 :::
 - `mv test test2`将test重命名为test2
-- `mv  index.html work/`将index.html文件移动到work目录下
+- `mv index.html work/`将index.html文件移动到work目录下
+- `mv some_dir  /home/blet/work`将some_dir文件夹移动到 /home/blet/work目录下
 - `mv /home/blet/test /home/blet/work/test2`将/home/blet/目录下的test文件移动到/home/blet/work/目录下并重命名为test2
 
 #### 删除文件
@@ -145,4 +146,67 @@ head命令会显示文件开头那些行的内容(默认情况下，它会显示
 $ head log_file
 $ head -n 2 log_file    '显示前2行'
 ```
+
+
+## 文件压缩
+
+#### gzip压缩
+::: tip
+gzip压缩后的格式为：*.gz<br/>
+这种压缩方式不能保存原文件；且不能压缩目录
+:::
+```
+$ gzip test    'test.gz'
+$ gunzip test.gz    'test'
+```
+
+#### tar压缩
+
+- `-z(gzip)` 用gzip来压缩/解压缩文件
+- `-j(bzip2)` 用bzip2来压缩/解压缩文件
+- `-v(verbose)` 详细报告tar处理的文件信息
+- `-c(create)` 创建新的档案文件
+- `-x(extract)` 解压缩文件或目录
+- `-f(file)` 使用档案文件或设备，这个选项通常是必选的
+```
+$ tar -zcvf test.tar.gz test
+$ tar -zxvf file.tar.gz
+```
+
+## 搜索文件
+::: tip
+find命令可以快速查找文件或目录。
+:::
+```
+$ find path -name filename
+```
+- `find . -name index.js`  查找所有名为index.js的文件
+- `find components -name *.js `   查找指定类型的文件
+
+## 查找文件中的关键字
+::: tip
+grep命令查找文件中的关键字。
+:::
+```
+$ grep string [选项] file
+```
+- `grep React index.js`  在index.js文件中查找React关键字
+- `grep -i React index.js`   -i参数不区分大小写
+- `grep -c React index.js`   可以找到给定字符串/模式匹配的行数
+
+
+## 远程服务器
+::: tip
+mac连接linux远程服务器
+:::
+
+```
+$ sudo -i   '切换到root用户'
+$ ssh -p port user@ip   'ssh -p 22 root@192.168.37.63'
+```
+
+::: tip
+mac向linux远程服务端上传文件
+:::
+打开本地终端：输入命令scp 本地文件地址 root@服务端ip: 服务端路径
 
