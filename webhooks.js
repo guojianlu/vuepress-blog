@@ -34,12 +34,9 @@ handler.on('error', err => {
 });
 
 handler.on('*', event => {
-  if (event.payload.ref === 'refs/heads/master') {
-    console.log('Recerve: ', event.payload);
-    run_cmd('sh', ['./ssh-deploy.sh'], function(text) {
-      console.log(text);
-    });
-  }
+  run_cmd('sh', ['./ssh-deploy.sh'], function(text) {
+    console.log(text);
+  });
 });
 
 
