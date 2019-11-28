@@ -4,8 +4,9 @@ const cssSidebar = {
   collapsable: false,
   children: [
     '/css/',
+    '/css/flex.md',
+    '/css/grid.md',
     '/css/animation.md',
-    '/css/flex.md'
   ]
 }
 
