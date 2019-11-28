@@ -1,4 +1,4 @@
-# FlexBox布局
+# Flex布局
 
-## FlexBobx语法
+## Flex语法
 
