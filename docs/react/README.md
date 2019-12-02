@@ -2,13 +2,14 @@
 sidebar: auto
 ---
 
-## 事件处理
+## React
+### 事件处理
 ::: tip
 回调中使用箭头函数：此语法问题在于每次渲染时都会创建不同的回调函数。在大多数情况下，这没什么问题，但如果该回调函数作为 prop 传入子组件时，这些组件可能会进行额外的重新渲染。我们通常建议在构造器中绑定或使用 class fields 语法来避免这类性能问题( public class fields *实验性* 语法)。
 :::
 
 
-## 鼠标和指针事件
+### 鼠标和指针事件
 ::: tip
 通过点击元素以外的地方来关闭已打开的弹出框<br />
 通常实现这个功能的方法是在 window 对象中附上一个 click 事件以关闭弹窗
@@ -65,10 +66,131 @@ class OuterClickExample extends React.Component {
 
 
 
+## Redux
+
+### compose
+::: tip
+其实 compose 函数做的事就是把 const res = fn1(fn2(fn3(fn4(x)))) 这种嵌套的调用方式改成<br/> 
+const res = compose(fn1,fn2,fn3,fn4)(x) 的方式调用。
+:::
+
+```
+export default function compose(...funcs) {
+  if (funcs.length === 0) {
+    return arg => arg
+  }
+
+  if (funcs.length === 1) {
+    return funcs[0]
+  }
+
+  return funcs.reduce((a, b) => (...args) => a(b(...args)))
+}
+```
+
+```
+import {compose} from 'redux'
+let x = 10
+function fn1(x) {return x + 1}
+function fn2(x) {return x + 2}
+function fn3(x) {return x + 3}
+function fn4(x) {return x + 4}
+
+// 假设我这里想求得这样的值
+let a = fn1(fn2(fn3(fn4(x)))) // 10 + 4 + 3 + 2 + 1 = 20
+
+// 根据compose的功能，我们可以把上面的这条式子改成如下：
+let composeFn = compose(fn1, fn2, fn3, fn4)
+let b = composeFn(x) // 理论上也应该得到20
+其实执行的就是: [fn1,fn2,fn3.fn4].reduce((a, b) => (...args) => a(b(...args)))
+```
+
+### createStore
+```
+export function createStore(reducer, enhancer) {
+  if (enhancer) {
+    return enhancer(createStore)(reducer);
+  }
+
+  let currentState;
+
+  const currentListeners = [];
+  
+  function getState() {
+    return currentState;
+  }
+
+  function dispatch(action) {
+    currentState = reducer(currentState, action);
+    currentListeners.map(v => v());
+
+    return action;
+  }
+
+  function subscribe(listener) {
+    currentListeners.push(listener);
+  }
+
+  dispatch({type:'@@OOO/KKB-REDUX'});
+  
+  return {
+    getState,
+    dispatch,
+    subscribe,
+  };
+}
+```
+
+### applyMiddleware
+```
+export function applyMiddleware(...middlewares) {
+  return createStore => (...args) => {
+    const store = createStore(...args);
+    let dispatch = store.dispatch;
+    
+    const midApi = {
+      getState: store.getState,
+      dispatch: (...args) => dispatch(...args),
+    };
+
+    const middlewareChain = middlewares.map(middleware => middleware(midApi));
+
+    dispatch = compose(...middlewareChain)(store.dispatch);
+
+    return {
+      ...store,
+      dispatch,
+    };
+  }
+}
+```
 
 
+### koa-compose
+```
+function compose (middleware) {
+  if (!Array.isArray(middleware)) throw new TypeError('Middleware stack must be an array!')
+  for (const fn of middleware) {
+    if (typeof fn !== 'function') throw new TypeError('Middleware must be composed of functions!')
+  }
 
-
-
-
+  return function (context, next) {
+    // last called middleware #
+    let index = -1
+    return dispatch(0)
+    function dispatch (i) {
+      if (i <= index) return Promise.reject(new Error('next() called multiple times'))
+      index = i
+      let fn = middleware[i]
+      if (i === middleware.length) fn = next
+      if (!fn) return Promise.resolve()
+      try {
+        return Promise.resolve(fn(context, dispatch.bind(null, i + 1)));
+      } catch (err) {
+        return Promise.reject(err)
+      }
+    }
+  }
+}
+```
 
