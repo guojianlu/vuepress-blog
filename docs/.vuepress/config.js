@@ -20,6 +20,7 @@ module.exports = {
     lastUpdated: 'Last Updated',
     nav: [
       { text: '首页', link: '/' },
+      { text: 'React',link: '/react/'},
       { text: '前端面试之道',link: '/interview/'},
       { text: 'JavaScript设计模式', link: '/designPattern/'},
       { text: 'CSS奇技淫巧',link: '/css/'},
