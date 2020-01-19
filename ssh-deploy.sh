@@ -1,4 +1,4 @@
-et -e
+set -e
 npm run docs:build
 cd docs/.vuepress/dist
 
