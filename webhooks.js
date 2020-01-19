@@ -23,7 +23,7 @@ function run_cmd(cmd, args, callback) {
 http.createServer((req, res) => {
   handler(req, res, err => {
     res.statusCode = 404;
-    res.end('no sush location');
+    res.end('no such location');
   });
 }).listen(7777, () => {
   console.log('Webhook listen at 7777');
