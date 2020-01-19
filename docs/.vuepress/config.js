@@ -24,6 +24,7 @@ module.exports = {
       { text: '前端面试之道',link: '/interview/'},
       { text: 'JavaScript设计模式', link: '/designPattern/'},
       { text: 'CSS奇技淫巧',link: '/css/'},
+      { text: 'Webpack',link: '/webpack/'},
       { text: 'Git',link: '/git/'},
       { text: 'Linux',link: '/linux/'},
     ],
