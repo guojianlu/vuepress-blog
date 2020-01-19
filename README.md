@@ -17,3 +17,8 @@ $ npm run docs:dev
 ``` sh
 $ npm run docs:build
 ```
+
+## 部署
+```
+$ sh ssh-deploy.sh
+```
