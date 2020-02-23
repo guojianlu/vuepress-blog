@@ -3,6 +3,10 @@ sidebar: auto
 ---
 # Webpack
 
+## 简易版webpack
+[简易版webpack](https://github.com/guojianlu/simple-webpack)
+
+
 ## 环境选项
 当 webpack 配置对象导出为一个函数时，可以向起传入一个"环境对象(environment)"。
 ```sh
@@ -125,3 +129,187 @@ if(module.hot) {
   });
 }
 ```
+
+## 如何写一个Loader
+::: tip
+- loader就是一个函数，不可以是箭头函数(会改变this的指向)
+- loader接收一份源代码，然后对源代码进行处理之后返回
+- loader必须有返回，否则会报错
+:::
+
+### loader如何接收参数
+- this.query
+  + 如果这个 loader 配置了 options 对象的话，this.query 就指向这个 option 对象。
+  + 如果 loader 中没有 options，而是以 query 字符串作为参数调用时，this.query 就是一个以 ? 开头的字符串。
+- loader-utils
+```
+module.exports = function(source) {  // source就是源代码
+  return source.replace('world', this.query.name);
+}
+```
+
+### loader如何返回多个信息
+- this.callback 如何返回多个信息，不止是处理好的源码呢，可以使用this.callback来处理
+```
+// this.callback参数
+this.callback(
+  err: Error | null,
+  content: string | Buffer,
+  sourceMap?: SourceMap,
+  meta?: any
+);
+```
+```
+module.exports = function(source) {
+  const result = source.replace('world', this.query.name);
+  this.callback(null, result);
+}
+```
+
+### loader里如何处理异步事件
+- this.async
+```
+module.exports = function(source) {
+  // callback 就是 this.callback 注意参数的使⽤
+  const callback = this.async();
+  setTimeout(() => {
+    const result = source.replace('world', this.query.name);
+    callback(null, result);
+  }, 1000);
+}
+```
+
+### 多个loader的使⽤
+- 顺序，自右到左
+
+### 处理loader的路径问题
+- 默认情况下，使用自己写的loader,需要使用绝对路径
+- 通过resolveLoader配置项来指定loader的查找位置之后，就可以进行简写了
+```
+resolveLoader: {
+  modules: ['node_modules', './loaders']
+},
+module: {
+  rules: [
+    {
+      test: /\.js$/,
+      use: [
+        'replaceLoader',
+        {
+          loader: 'replaceLoaderAsync',
+          options: {
+            name: 'kobe!!!'
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+[参考:loader API](https://webpack.js.org/api/loaders)
+
+
+## 如何编写一个Plugin
+::: tip
+- 开始打包，在某个时刻，帮助我们处理理一些什么事情的机制
+- plugin是一个类，⾥面包含一个apply函数，接受一个参数， compiler
+- compiler通过hooks暴露出很多钩子
+- 钩子分为同步钩子和异步钩子
+- 同步钩子通过tap调用，异步钩子通过tapAsync调用
+:::
+[官⽅文档](https://webpack.js.org/contribute/writing-a-plugin/) <br />
+[参考:compiler-hooks](https://webpack.js.org/api/compiler-hooks)
+
+简单案例
+```
+class CopyrightWebpackPlugin {
+  constructor(options) {
+    this.options = options;
+    console.log(options);
+  }
+  apply(compiler) {
+    // 同步钩子
+    compiler.hooks.compile.tap('CopyrightWebpackPlugin', (compilation) => {
+      console.log('执行了');
+    })
+
+    // 异步钩子
+    // compilation里包含打包过程的的资源和代码
+    compiler.hooks.emit.tapAsync('CopyrightWebpackPlugin', (compilation, cb) => {
+      // assets资源列表对象
+      compilation.assets['copyright.txt'] = {
+        // 定义资源内容
+        source: function() {
+          return 'hello plugin';
+        },
+        // 定义资源的大小
+        size: function() {
+          return 20;
+        }
+      };
+      cb();  // 不要忘记cb的调用
+    })
+  }
+}
+
+module.exports = CopyrightWebpackPlugin;
+```
+
+## 多⼊口打包配置通⽤方案
+1、调整目录结构
+- src
+  + index
+    - index.js
+    - index.html
+  + list
+    - index.js
+    - index.html
+  + detail
+    - index.js
+    - index.html
+
+2、配置方案
+```
+const setMPA = () => {
+  const entry = {};
+  const htmlWebpackPlugins = [];
+  const entryFiles = glob.sync(path.join(__dirname, './src/*/index.js'));
+  entryFiles.map(entryFile => {
+    const match = entryFile.match(/src\/(.*)\/index\.js$/);
+    const pageName = match && match[1];
+    entry[pageName] = entryFile;
+    htmlWebpackPlugins.push(
+      new htmlWebpackPlugin({
+        title: pageName,
+        template: path.join(__dirname, `src/${pageName}/index.html`),
+        filename: `${pageName}.html`,
+        chunks: [pageName],
+        inject: true
+      })
+    );
+  });
+  
+  return { entry, htmlWebpackPlugins };
+};
+```
+3、配置文件
+```
+const { entry, htmlWebpackPlugins } = setMPA();
+module.exports = {
+  entry,
+  mode: 'development',
+  output: {
+    path: path.resolve(__dirname, './dist'),
+    filename: '[name].js'
+  },
+  plugins: [
+    ...htmlWebpackPlugins
+  ]
+};
+```
+[plugin|loader|mpa]
+
+## 优化
+1、在生产环境中，使用TerserPlugin压缩JS比UglifyJsPlugin的效果更好，时间更短。<br/>
+2、在webpack的最新版本中(4.41.*)，可以使用hard-source-webpack-plugin来代替        webpack.DllPlugin。优化效果比webpack.DllPlugin更加明显，打包时间缩短将近70~80%。<br/>
+3、Happyhack与mini-css-extrect-webpack-plugin一起是用会报错，有问题，所以推荐在开发环境使用Happypack，与style-loader一起使用。Happyhack在较小的项目中使用，优化效果不是很明显，打包时间反而会增加。
