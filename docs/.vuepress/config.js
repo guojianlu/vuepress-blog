@@ -3,7 +3,7 @@ const { cssSidebar } = nav;
 module.exports = {
   title: '奔跑的小鸟',
   description: '奔跑的小鸟的个人站点',
-  base: '/blog/',
+  base: '/portal/lib/blog',
   head: [
     ['link', { rel: 'icon', href: '/icon.png' }]
   ],
