@@ -305,8 +305,14 @@ git push -delete origin <branchName>
 
 ### 解决冲突
 当合并分支出现冲突时，可以利用`git status`查看冲突的位置<br>
-在`cat xxx`命令，查看各分支的内容，手动编辑成相同的<br>
-最后提交，删除分支
+手动解决冲突后
+```
+$ git add 冲突文件
+$ git merge --continue
+
+# 放弃解决冲突，取消 merge 
+$ git merge —abort
+```
 
 ### Bug分支
 工作做一半，突然接到一个任务解决bug，该怎样进行合理的git操作
@@ -372,6 +378,16 @@ $ git log --pretty=oneline
 # 变基
 $ git rebase master 
 ```
+> rebase 过程可能会出现冲突，解决冲突后
+
+```
+$ git add .
+# 接下来git会继续应用剩余的补丁
+$ git rebase --continue  
+# 任何时候都可以使用如下命令终止rebase,分支会恢复到rebase开始前的状态
+$ git rebase --abort
+```
+
 
 ### cherry-pick
 ::: tip
@@ -425,7 +441,10 @@ $ git push origin master --force
 $ git tag -a daily/0.0.1 -m "add develop file" 
 
 # 简单创建tag
-$ git tag daily/0.0.1                                 
+$ git tag daily/0.0.1       
+
+# 删除标签
+$ git tag -d v1.0.0  
 
 # 分享tag到远端
 $ git push origin [tagname]
@@ -433,4 +452,60 @@ $ git push origin --tags
 
 # 如何已某个tag创建分支
 $ git checkout -b <newbranch> <tagname>
+```
+
+
+### 其他
+
+#### 如果你想看某个具体的 commit 的改动内容，可以用 show 命令
+```
+# 看当前 commit
+$ git show
+
+$ git show 5e68b0d8	
+
+# 看指定 commit 中的指定文件
+$ git show 5e68b0d8 list.txt
+```
+
+#### checkout 的本质
+::: tip
+checkout 并不止可以切换 branch。checkout 本质上的功能其实是: 签出( checkout )指定的 commit。<br>
+git checkout branch 的本质，其实是把 HEAD指向指定的branch，然后签出这个 branch 所对应的 commit 的工作目录。
+:::
+
+```
+# 树状
+$ git log —graph
+
+# 只能往回看
+$ git log --prety=oneline
+
+# 查看所有操作记录
+$ git reflog
+
+# 丢弃工作区的修改
+$ git checkout -- file   
+
+# 将file的内容从暂存区移除回工作区
+$ git reset HEAD file  		 
+
+# 修改分支名称
+$ git branch -m branchName alise 
+
+# 重命名并将修改添加到暂存区
+$ git mv test.txt test2.txt  
+
+# 删除一个文件并将修改添加到暂存区
+$ git rm test.txt 
+
+$ git commit --amend -m '修正上一次的提交信息'
+
+# 仅查看最近3条的提交信息
+$ git log -3 
+
+$ git log —-pretty=oneline
+
+# 没有被 track 的文件(即从来没有被 add 过的文件不会被 stash 起来，因为 Git 会忽略它们。如果想把这些文件也一起 stash，可以加上 `-u` 参数，它是 `--include-untracked` 的简写。
+$ git stash -u
 ```
