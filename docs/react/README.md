@@ -68,6 +68,31 @@ class OuterClickExample extends React.Component {
 
 ## Redux
 
+### Reducer
+::: tip
+reducer 就是⼀个纯函数，接收旧的 state 和 action，返回新的 state。
+:::
+
+```
+(previousState, action) => newState
+```
+
+思考:有如下函数， 聚合成⼀个函数，并把第一个函数的返回值传递给下一个函数，如何处理。
+```
+function f1(arg) {
+  console.log("f1", arg);
+  return arg;
+}
+function f2(arg) {
+  console.log("f2", arg);
+  return arg; 
+}
+function f3(arg) {
+  console.log("f3", arg);
+  return arg;
+}
+```
+
 ### compose
 ::: tip
 其实 compose 函数做的事就是把 const res = fn1(fn2(fn3(fn4(x)))) 这种嵌套的调用方式改成<br/> 
@@ -105,6 +130,13 @@ let b = composeFn(x) // 理论上也应该得到20
 其实执行的就是: [fn1,fn2,fn3.fn4].reduce((a, b) => (...args) => a(b(...args)))
 ```
 
+
+### 核心实现
++ 存储状态state 
++ 获取状态getState 
++ 更新状态dispatch 
++ 变更订阅subscribe
+
 ### createStore
 ```
 export function createStore(reducer, enhancer) {
@@ -140,6 +172,13 @@ export function createStore(reducer, enhancer) {
   };
 }
 ```
+
+
+### 异步
+Redux只是个纯粹的状态管理器，默认只支持同步，实现异步任务 比如延迟，网络请求，需要中间件的 支持，比如我们使⽤最简单的redux-thunk和redux-logger 。<br>
+中间件就是⼀个函数，对 store.dispatch ⽅法进行改造，在发出 Action 和执行 Reducer 这两步之 间，添加了其他功能。
+
+
 
 ### applyMiddleware
 ```
@@ -194,3 +233,5 @@ function compose (middleware) {
 }
 ```
 
+
+## React-Redux
