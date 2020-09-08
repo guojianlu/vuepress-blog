@@ -161,9 +161,15 @@ export function createStore(reducer, enhancer) {
 
   function subscribe(listener) {
     currentListeners.push(listener);
+    // 返回取消订阅的函数
+    return () => {
+      const index = currentListeners.indexOf(listener);
+      currentListeners.splice(index, 1);
+    };
   }
 
-  dispatch({type:'@@OOO/KKB-REDUX'});
+  // 手动执行一下dispatch，赋上初始值
+  dispatch({type:'@@XXX-OOO-REDUX'});
   
   return {
     getState,
@@ -183,19 +189,21 @@ Redux只是个纯粹的状态管理器，默认只支持同步，实现异步任
 ### applyMiddleware
 ```
 export function applyMiddleware(...middlewares) {
-  return createStore => (...args) => {
-    const store = createStore(...args);
+  return createStore => reducer => {
+    const store = createStore(reducer);
     let dispatch = store.dispatch;
     
     const midApi = {
       getState: store.getState,
-      dispatch: (...args) => dispatch(...args),
+      dispatch: action => dispatch(action),
     };
 
     const middlewareChain = middlewares.map(middleware => middleware(midApi));
 
+    // 加强dispatch，执行dispatch的时候将所有的中间件全都执行一遍
     dispatch = compose(...middlewareChain)(store.dispatch);
 
+    // 返回store，同时加强dispatch
     return {
       ...store,
       dispatch,
@@ -203,6 +211,43 @@ export function applyMiddleware(...middlewares) {
   }
 }
 ```
+
+
+### redux-thunk
+```
+function thunk({ dispatch, getState }) {
+  // next 就是下一个中间件处理的结果---返回的一个新的(加强的)dispatch
+  return next => action => {
+    if (typeof action === 'function') {
+      return action(dispatch, getState);
+    }
+    return next(action);
+  }
+}
+```
+
+### redux-logger
+```
+function logger({ dispatch, getState }) {
+  // next 就是下一个中间件处理的结果---返回的一个新的(加强的)dispatch
+  return next => action => {
+    console.log('#############################');
+    // prev state
+    const prevState = getState();
+    console.log('prev state: ', prevState);
+
+    // next state
+    const returnValue = next(action);
+    const nextState = getState();
+    console.log('next state: ', nextState);
+
+    console.log('#############################');
+
+    return returnValue;
+  }
+}
+```
+
 
 
 ### koa-compose
