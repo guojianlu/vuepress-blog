@@ -68,6 +68,61 @@ class OuterClickExample extends React.Component {
 
 ## Redux
 
+### redux上⼿
+1. 需要⼀个store来存储数据
+2. store里的reducer初始化state并**定义state修改规**
+3. 通过dispatch一个action来提交对数据的修改
+4. action提交到reducer函数⾥里里，根据传⼊入的action的type，返回新的state
+```
+import {createStore} from "redux";
+function countReducer(state = 0, action) {
+  switch (action.type) {
+    case "ADD":
+      return state + 1;
+    case "MINUS":
+      return state - 1;
+    default:
+      return state;
+  }
+}
+const store = createStore(countReducer);
+export default store;
+```
+
+```
+ 
+import React, {Component} from "react";
+import store from "../store/";
+
+export default class ReduxPage extends Component {
+  componentDidMount() {
+    store.subscribe(() => {
+      this.forceUpdate();
+    }); 
+  }
+  add = () => {
+    store.dispatch({type: "ADD"});
+  };
+  minus = () => {
+    store.dispatch({type: "MINUS"});
+  };
+  render() {
+    console.log("store", store); //sy-log
+    return (
+      <div>
+        <h3>ReduxPage</h3>
+        <p>{store.getState()}</p>
+        <button onClick={this.add}>add</button>
+        <button onClick={this.minus}>minus</button>
+      </div>
+    );
+  }
+}
+
+```
+
+
+
 ### Reducer
 ::: tip
 reducer 就是⼀个纯函数，接收旧的 state 和 action，返回新的 state。
