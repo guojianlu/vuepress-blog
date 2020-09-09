@@ -226,6 +226,7 @@ function thunk({ dispatch, getState }) {
 }
 ```
 
+
 ### redux-logger
 ```
 function logger({ dispatch, getState }) {
@@ -245,6 +246,38 @@ function logger({ dispatch, getState }) {
 
     return returnValue;
   }
+}
+```
+
+
+### redux-promise
+`简版:`
+```
+function promise({ dispatch }) {
+  return next => action => {
+    return isPromise(action) ? action.then(dispatch) : next(action);
+  };
+}
+```
+
+
+### combineReducers
+```
+function combineReducers(reducers) {
+  // 返回一个新的reducer
+  return function combination(state = {}, action) {
+    const nextState = {};
+    let hasChanged = false;
+    for(let key in reducers) {
+      const reducer = reducers[key];
+      nextState[key] = reducer(state[key], action)
+      hasChanged = hasChanged || nextState[key] !== state[key];
+    }
+
+    hasChanged = hasChanged || Object.keys(nextState).length !== Object.keys(state).length;
+
+    return hasChanged ? nextState : state;
+  };
 }
 ```
 
