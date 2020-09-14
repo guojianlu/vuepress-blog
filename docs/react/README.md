@@ -368,3 +368,144 @@ function compose (middleware) {
 
 
 ## React-Redux
+
+每次都重新调用render和getState太low了，想用更react的方式来写，需要react-redux的支持。
+```
+$ yarn add react-redux
+```
+提供了两个api
+1. Provider 为后代组件提供store
+2. connect 为组件提供数据和变更方法
+
+全局提供store，index.js
+```
+import React from "react";
+import ReactDOM from "react-dom";
+import App from "./App";
+import {Provider} from "react-redux";
+import store from "./store/";
+// 把Provider放在根组件外层，使子组件能获得store 
+ReactDOM.render(
+  <Provider store={store}>
+    <App />
+  </Provider>,
+  document.getElementById("root")
+);
+```
+
+获取状态数据，ReactReduxPage.js
+```
+import React, { Component } from "react";
+import { connect } from "react-redux";
+class ReactReduxPage extends Component {
+  render() {
+    const { num, add, minus, asyAdd } = this.props;
+    return (
+      <div>
+        <h1>ReactReduxPage</h1>
+        <p>{num}</p>
+        <button onClick={add}>add</button>
+        <button onClick={minus}>minus</button>
+      </div>
+    ); 
+  }
+}
+
+const mapStateToProps = state => {
+  return {
+    num: state,
+  };
+};
+
+const mapDispatchToProps = {
+  add: () => {
+    return { type: "add" };
+  },
+  minus: () => {
+    return { type: "minus" };
+  }
+}
+
+// mapDispatchToProps也可以是一个函数
+const mapDispatchToProps = (dispatch, ownProps) => {
+    let creators = {
+      add: payload => ({type: "ADD", payload}),
+      minus: () => ({type: "MINUS"})
+    };
+    creators = bindActionCreators(creators, dispatch);
+    return {dispatch, ...creators};
+  }
+
+
+export default connect(
+  mapStateToProps, //状态映射 mapStateToProps 
+  mapDispatchToProps, //派发事件映射
+)(ReactReduxPage);
+```
+> connect中的参数:state映射和事件映射
+
+```
+import React, {useContext, useReducer, useLayoutEffect} from "react";
+const Context = React.createContext();
+export const connect = (
+  mapStateToProps = state => state,
+  mapDispatchToProps
+) => WrappendComponent => props => {
+  const store = useContext(Context);
+  const {dispatch, getState, subscribe} = store;
+  const stateProps = mapStateToProps(getState());
+  let dispatchProps = {dispatch};
+  
+  // 函数组件中引起更新
+  const [ignored, forceUpdate] = useReducer(x => x + 1, 0);
+
+  if (typeof mapDispatchToProps === "function") {
+    dispatchProps = mapDispatchToProps(dispatch);
+  } else if (typeof mapDispatchToProps === "object") {
+    dispatchProps = bindActionCreators(mapDispatchToProps, dispatch);
+  }
+
+  // 这里不能用useEffect，因为useEffect有延迟，组件渲染完成之后才会延迟执行，在组件渲染完到延迟执行的, 
+  // 这个间隙可能会有store state发生改变，但是，这个时候还没有订阅，就可能会丢失一些数据信息。
+  useLayoutEffect(() => {
+    const unsubscribe = store.subscribe(() => {
+      // 执行组件更新
+      forceUpdate();
+    });
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
+  }, [store]);
+
+  return <WrappendComponent {...props} {...stateProps} {...dispatchProps} />;
+};
+
+export function Provider({store, children}) {
+  return <Context.Provider value={store}>{children}</Context.Provider>;
+}
+
+function bindActionCreator(creator, dispatch) {
+  return (...args) => dispatch(creator(...args));
+}
+
+// 这个方法在Redux里面
+function bindActionCreators(creators, dispatch) {
+  const obj = {};
+  for (let key in creators) {
+    obj[key] = bindActionCreator(creators[key], dispatch);
+  }
+  return obj; 
+}
+```
+
+
+
+
+
+
+
+
+
+
