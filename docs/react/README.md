@@ -498,13 +498,40 @@ function bindActionCreators(creators, dispatch) {
   }
   return obj; 
 }
+
+// 自定义hook
+export function useSelector(selector) {
+  // 获取store
+  const store = useStore();
+  const { getState } = store;
+  const selectedState = selector(getState());
+
+  const [ignored, forceUpdate] = useReducer(x => x + 1, 0);
+  useLayoutEffect(() => {
+    const unsubscribe = store.subscribe(() => {
+      // 执行组件更新
+      forceUpdate();
+    });
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
+  }, [store]);
+
+  return selectedState;
+}
+
+export function useStore() {
+  const store = React.useContent(Content);
+  return store;
+}
+
+export function useDispatch() {
+  const store = useStore();
+  return store.dispatch;
+}
 ```
-
-
-
-
-
-
 
 
 
