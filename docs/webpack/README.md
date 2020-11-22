@@ -206,6 +206,37 @@ module: {
   ]
 }
 ```
+
+### 自定义less-loader
+```
+const less = require('less');
+
+module.export = function(source) {
+  less.render(source, (err, output) => {
+    const { css } = output;
+    this.callback(err, css);
+  });
+}
+```
+
+### 自定义css-loader
+```
+module.export = function(source) {
+  return JSON.stringify(source);
+}
+```
+
+### 自定义style-loader
+```
+module.export = function(source) {
+  return `
+    const tag = document.createElement('style');
+    tag.innerHTML = ${source};
+    document.head.appendChild(tag);
+  `;
+}
+```
+
 [参考:loader API](https://webpack.js.org/api/loaders)
 
 
@@ -313,3 +344,4 @@ module.exports = {
 1、在生产环境中，使用TerserPlugin压缩JS比UglifyJsPlugin的效果更好，时间更短。<br/>
 2、在webpack的最新版本中(4.41.*)，可以使用hard-source-webpack-plugin来代替        webpack.DllPlugin。优化效果比webpack.DllPlugin更加明显，打包时间缩短将近70~80%。<br/>
 3、Happyhack与mini-css-extrect-webpack-plugin一起是用会报错，有问题，所以推荐在开发环境使用Happypack，与style-loader一起使用。Happyhack在较小的项目中使用，优化效果不是很明显，打包时间反而会增加。
+4、在项目工程下面新建一个 `.npmrc` 的文件，写入 registry=https://registry.npm.taobao.org/ 。修改npm包的下载源，加速依赖安装的速度。
