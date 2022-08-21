@@ -2,10 +2,13 @@
 sidebar: auto
 ---
 # Webpack
+::: tip
+[最新webpack5教程](https://guojianlu.github.io/webpack5-docs/)
+:::
 
-## 简易版webpack
+::: tip
 [简易版webpack](https://github.com/guojianlu/simple-webpack)
-
+:::
 
 ## 环境选项
 当 webpack 配置对象导出为一个函数时，可以向起传入一个"环境对象(environment)"。

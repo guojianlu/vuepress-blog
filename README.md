@@ -20,5 +20,5 @@ $ npm run docs:build
 
 ## 部署
 ```
-$ sh ssh-deploy.sh
+$ npm run docs:deploy
 ```

@@ -1,7 +1,30 @@
 ---
 sidebar: auto
 ---
-> 面向对象编程(OOP)通过封装变化使得代码更易理解。 函数式编程(FP)通过最小化变化使得代码更易理解。 -- Michacel Feathers（Twitter）
+# JavaScript
+
+## 环境准备
+### 安装 nvm
+```sh
+$ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+$ nvm -v
+0.39.1
+```
+
+### 安装 node
+```sh
+$ nvm install 16
+$ nvm use 16
+$ node -v
+v16.10.0
+```
+
+### 安装 pnpm
+```sh
+$ curl -fsSL https://get.pnpm.io/install.sh | sh -
+$ pnpm -v
+7.3.0
+```
 
 ## 函数式编程
 
